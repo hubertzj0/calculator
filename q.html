@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Q版科技風工程計算機</title>
+    <style>
+        :root {
+            --metal-light: #f4f7f9;
+            --metal-dark: #b8c4d1;
+            --screen-bg: #0a1118;
+            --screen-text: #00ffcc;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            /* 這裡設定為你指定的背景圖片檔名 */
+            background-image: url('背景_2.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #222; /* 預設底色 */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .calculator {
+            /* 鈦銀色科技感底座 */
+            background: linear-gradient(135deg, var(--metal-light), var(--metal-dark));
+            padding: 25px;
+            border-radius: 30px;
+            box-shadow: 15px 15px 30px rgba(0,0,0,0.6), 
+                       -10px -10px 20px rgba(255,255,255,0.4),
+                       inset 2px 2px 5px rgba(255,255,255,0.8);
+            width: 400px;
+            border: 1px solid rgba(255,255,255,0.5);
+            backdrop-filter: blur(8px);
+        }
+
+        .display {
+            background-color: var(--screen-bg);
+            color: var(--screen-text);
+            font-size: 2.5rem;
+            text-align: right;
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 8px 15px rgba(0,0,0,1), 0 2px 2px rgba(255,255,255,0.3);
+            overflow-x: auto;
+            white-space: nowrap;
+            font-family: 'Courier New', Courier, monospace;
+            text-shadow: 0 0 10px var(--screen-text);
+            min-height: 50px;
+            border: 2px solid #2a3b50;
+        }
+
+        .display::-webkit-scrollbar { height: 6px; }
+        .display::-webkit-scrollbar-thumb { background: var(--screen-text); border-radius: 5px; }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+
+        /* 基礎純 CSS 按鈕 (給工程符號使用) */
+        .css-btn {
+            border: none;
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            height: 55px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 3px 3px 6px rgba(0,0,0,0.3), -3px -3px 6px rgba(255,255,255,0.5);
+            transition: all 0.1s ease-in-out;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+        .css-btn:active {
+            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.3), inset -3px -3px 6px rgba(255,255,255,0.5);
+            transform: scale(0.95);
+        }
+
+        /* 五彩繽紛的科技風工程按鈕 */
+        .btn-sin { background: linear-gradient(145deg, #ff4da6, #cc0066); }
+        .btn-cos { background: linear-gradient(145deg, #00e6e6, #009999); }
+        .btn-tan { background: linear-gradient(145deg, #aaff00, #77b300); color: #222; text-shadow: none; }
+        .btn-log { background: linear-gradient(145deg, #ffcc00, #cc9900); color: #222; text-shadow: none; }
+        .btn-ln  { background: linear-gradient(145deg, #ff8c1a, #cc6600); }
+        .btn-pow { background: linear-gradient(145deg, #ff4d4d, #cc0000); }
+        .btn-sqrt{ background: linear-gradient(145deg, #b366ff, #7300e6); }
+        .btn-pi  { background: linear-gradient(145deg, #4d94ff, #005ce6); }
+        .btn-bracket { background: linear-gradient(145deg, #00ff80, #00b359); color: #111; text-shadow: none;} /* 括號同色 */
+
+        /* 圖片按鍵專用設定 */
+        .img-btn {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0;
+            cursor: pointer;
+            height: 60px; /* 圖片按鈕稍微大一點點 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .img-btn:active {
+            transform: scale(0.85);
+        }
+        .img-btn img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain; /* 確保圖片比例完美不變形 */
+            filter: drop-shadow(2px 4px 5px rgba(0,0,0,0.3)); /* 加上陰影提升質感 */
+        }
+
+        .span-2 { grid-column: span 2; }
+
+        /* 等於按鍵微微震動動畫 */
+        @keyframes vibrate {
+            0% { transform: translate(0) scale(1); }
+            20% { transform: translate(-2px, 2px) scale(1.05); }
+            40% { transform: translate(-2px, -2px) scale(1.05); }
+            60% { transform: translate(2px, 2px) scale(1.05); }
+            80% { transform: translate(2px, -2px) scale(1.05); }
+            100% { transform: translate(0) scale(1); }
+        }
+        .vibrating {
+            animation: vibrate 0.1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        
+        <div class="buttons">
+            <!-- 1. 工程進階符號 (CSS 按鈕，五彩繽紛) -->
+            <button onclick="append('sin(')" class="css-btn btn-sin">sin</button>
+            <button onclick="append('cos(')" class="css-btn btn-cos">cos</button>
+            <button onclick="append('tan(')" class="css-btn btn-tan">tan</button>
+            <button onclick="append('log(')" class="css-btn btn-log">log</button>
+            <button onclick="append('ln(')" class="css-btn btn-ln">ln</button>
+
+            <!-- 2. 工程進階符號 (括號同色) -->
+            <button onclick="append('^')" class="css-btn btn-pow">^</button>
+            <button onclick="append('√(')" class="css-btn btn-sqrt">√</button>
+            <button onclick="append('π')" class="css-btn btn-pi">π</button>
+            <button onclick="append('(')" class="css-btn btn-bracket">(</button>
+            <button onclick="append(')')" class="css-btn btn-bracket">)</button>
+
+            <!-- 3. 數字與控制鍵 -->
+            <button onclick="append('7')" class="img-btn"><img src="7.png" alt="7"></button>
+            <button onclick="append('8')" class="img-btn"><img src="8.png" alt="8"></button>
+            <button onclick="append('9')" class="img-btn"><img src="9.png" alt="9"></button>
+            <button onclick="deleteLast()" class="img-btn"><img src="DEL.png" alt="DEL"></button>
+            <button onclick="clearAll()" class="img-btn"><img src="AC.png" alt="AC"></button>
+
+            <!-- 4. 數字與運算子 -->
+            <button onclick="append('4')" class="img-btn"><img src="4.png" alt="4"></button>
+            <button onclick="append('5')" class="img-btn"><img src="5.png" alt="5"></button>
+            <button onclick="append('6')" class="img-btn"><img src="6.png" alt="6"></button>
+            <button onclick="append('×')" class="img-btn"><img src="乘.png" alt="×"></button>
+            <button onclick="append('÷')" class="img-btn"><img src="除.png" alt="÷"></button>
+
+            <!-- 5. 數字與運算子 -->
+            <button onclick="append('1')" class="img-btn"><img src="1.png" alt="1"></button>
+            <button onclick="append('2')" class="img-btn"><img src="2.png" alt="2"></button>
+            <button onclick="append('3')" class="img-btn"><img src="3.png" alt="3"></button>
+            <button onclick="append('+')" class="img-btn"><img src="加.png" alt="+"></button>
+            <button onclick="append('-')" class="img-btn"><img src="減.png" alt="-"></button>
+
+            <!-- 6. 零、小數點、等於 -->
+            <button onclick="append('0')" class="img-btn span-2"><img src="0.png" alt="0"></button>
+            <button onclick="append('.')" class="img-btn"><img src="點.png" alt="."></button>
+            <button onclick="calculate()" class="img-btn span-2" id="btn-equal">
+                <img id="brain-img" src="等於.png" alt="=">
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        const brainImg = document.getElementById('brain-img');
+        let isError = false;
+
+        // 重置大腦圖片與錯誤狀態
+        function resetState() {
+            brainImg.src = '等於.png';
+            brainImg.classList.remove('vibrating');
+            isError = false;
+        }
+
+        // 新增字元到螢幕
+        function append(value) {
+            if (isError || display.innerText === '0' || display.innerText === 'Error') {
+                display.innerText = '';
+                resetState();
+            }
+            display.innerText += value;
+        }
+
+        // 清除全部 (AC)
+        function clearAll() {
+            display.innerText = '0';
+            resetState();
+        }
+
+        // 退格刪除 (DEL)
+        function deleteLast() {
+            if (isError) {
+                clearAll();
+                return;
+            }
+            display.innerText = display.innerText.slice(0, -1);
+            if (display.innerText === '') display.innerText = '0';
+        }
+
+        // 顯示錯誤狀態
+        function triggerError(msg) {
+            display.innerText = msg;
+            isError = true;
+            brainImg.classList.remove('vibrating');
+            brainImg.src = '問號.png'; // 發生錯誤時變成問號圖片
+        }
+
+        // 執行數學計算
+        function calculate() {
+            if (isError) return;
+
+            // 觸發震動動畫 (代表大腦思考中)
+            brainImg.classList.add('vibrating');
+
+            setTimeout(() => {
+                try {
+                    let expr = display.innerText;
+                    
+                    // 防止除以 0 (防呆設計)
+                    if (expr.includes('÷0') || expr.includes('/0')) {
+                        throw new Error("DivByZero");
+                    }
+
+                    // 符號轉換為 JS 語法
+                    expr = expr.replace(/×/g, '*')
+                               .replace(/÷/g, '/')
+                               .replace(/\^/g, '**')
+                               .replace(/π/g, 'Math.PI');
+                    
+                    // 工程函數轉換
+                    expr = expr.replace(/sin\(/g, 'Math.sin(')
+                               .replace(/cos\(/g, 'Math.cos(')
+                               .replace(/tan\(/g, 'Math.tan(')
+                               .replace(/log\(/g, 'Math.log10(') // 底數為 10
+                               .replace(/ln\(/g, 'Math.log(')    // 自然對數
+                               .replace(/√\(/g, 'Math.sqrt(');
+
+                    // 執行計算
+                    let result = eval(expr);
+
+                    // 確認結果有效
+                    if (!isFinite(result) || isNaN(result)) {
+                        throw new Error("Invalid");
+                    }
+
+                    // 限制小數位數避免爆板，顯示結果
+                    let formattedResult = parseFloat(result.toFixed(8)).toString();
+                    display.innerText = formattedResult;
+                    
+                    // 運算成功，移除震動
+                    brainImg.classList.remove('vibrating');
+
+                } catch (e) {
+                    // 捕捉到語法錯誤或是除以0，觸發問號圖案彩蛋
+                    triggerError('Error');
+                }
+            }, 500); // 延遲0.5秒增加思考互動感
+        }
+    </script>
+</body>
+</html>
